@@ -1,8 +1,21 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope) {})
+.controller('DashCtrl', function($scope) {
 
-.controller('ChatsCtrl', function($scope, Chats) {
+    $scope.lastSyncArduino = "Never";
+    $scope.lastSyncServer = "Never";
+    $scope.getDatetime = function() {
+      return (new Date).getTime();
+    };
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+      $scope.lat = position.coords.latitude;
+      $scope.lng = position.coords.longitude;
+    });
+
+  })
+
+.controller('DatasCtrl', function($scope, Datas) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
@@ -11,18 +24,18 @@ angular.module('starter.controllers', [])
   //$scope.$on('$ionicView.enter', function(e) {
   //});
 
-  $scope.chats = Chats.all();
-  $scope.remove = function(chat) {
-    Chats.remove(chat);
+  $scope.datas = Datas.all();
+  $scope.remove = function(data) {
+    Datas.remove(data);
   };
 })
 
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-  $scope.chat = Chats.get($stateParams.chatId);
+.controller('DataDetailCtrl', function($scope, $stateParams, Datas) {
+  $scope.data = Datas.get($stateParams.dataId);
 })
 
-.controller('AccountCtrl', function($scope) {
+.controller('SettingsCtrl', function($scope) {
   $scope.settings = {
-    enableFriends: true
+    enableDebugMode: true
   };
 });
