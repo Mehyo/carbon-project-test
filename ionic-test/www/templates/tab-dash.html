@@ -12,6 +12,11 @@
       <div class="item item-divider">Phone informations</div>
       <div class="item item-body">
         <div>
+          Bluetooth devices: {{ devices }}
+        </div>
+      </div>
+      <div class="item item-body">
+        <div>
           GPS: {{ lat }} | {{ lng }}
         </div>
       </div>
@@ -31,7 +36,7 @@
         </div>
       </div>
     </div>
-    <button class="button bottom button-block button-light" ng-click="scheduleSingleNotification()">
+    <button class="button bottom button-block button-light" ng-click="listBluetoothDevices()">
       Force sync with Arduino
     </button>
     <button class="button bottom button-block button-light" ng-click="scheduleSingleNotification()">

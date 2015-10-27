@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope, $cordovaLocalNotification, $cordovaGeolocation, $interval) {
+.controller('DashCtrl', function($scope, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval) {
 
     $scope.lastSyncArduino = "Never";
     $scope.lastSyncServer = "Never";
@@ -29,6 +29,18 @@ angular.module('starter.controllers', [])
         $scope.lat = position.coords.latitude;
         $scope.lng = position.coords.longitude;
       });
+      $scope.devices = "null";
+      $scope.listBluetoothDevices = function() {
+        bluetoothSerial.discoverUnpaired(
+          function(undevices) {
+            angular.forEach(undevices, function(device){
+              $scope.devices.push(device);
+            });
+          },
+          function(){
+            console.log("Err");
+          });
+      }
 
     $interval(
     $scope.scheduleSingleNotification = function () {
