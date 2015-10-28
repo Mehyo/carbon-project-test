@@ -89,13 +89,22 @@ angular.module('starter.controllers', [])
 
 .controller('MapCtrl', function($scope, $ionicLoading, $compile) {
   function initialize() {
-    var site = new google.maps.LatLng(55.9879314,-4.3042387);
-    var hospital = new google.maps.LatLng(55.8934378,-4.2201905);
+
+    var geocoder = new google.maps.Geocoder();
+    var location = "114 rue Lucien Faure Bordeaux";
+    geocoder.geocode( { 'address': location }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        posEpsi = results[0].geometry.location;
+        map.setCenter(results[0].geometry.location);
+      } else {
+        alert("Could not find location: " + location);
+      }
+    });
+
 
     var mapOptions = {
       streetViewControl:true,
-      center: site,
-      zoom: 18,
+      zoom: 17,
       mapTypeId: google.maps.MapTypeId.TERRAIN
     };
 
@@ -110,16 +119,11 @@ angular.module('starter.controllers', [])
     });
 
     var marker = new google.maps.Marker({
-      position: site,
+      position: posEpsi,
       map: map,
-      title: 'Strathblane (Job Location)'
+      title: 'Je suis ICI !!!'
     });
 
-    var hospitalRoute = new google.maps.Marker({
-      position: hospital,
-      map: map,
-      title: 'Hospital (Stobhill)'
-    });
 
     var infowindow = new google.maps.InfoWindow({
       content:"Project Location"
@@ -127,33 +131,11 @@ angular.module('starter.controllers', [])
 
     infowindow.open(map,marker);
 
-    var hospitalwindow = new google.maps.InfoWindow({
-      content:"Nearest Hospital"
-    });
-
-    hospitalwindow.open(map,hospitalRoute);
-
     google.maps.event.addListener(marker, 'click', function() {
       infowindow.open(map,marker);
     });
 
     $scope.map = map;
-
-    var directionsService = new google.maps.DirectionsService();
-    var directionsDisplay = new google.maps.DirectionsRenderer();
-
-    var request = {
-      origin : site,
-      destination : hospital,
-      travelMode : google.maps.TravelMode.DRIVING
-    };
-    directionsService.route(request, function(response, status) {
-      if (status == google.maps.DirectionsStatus.OK) {
-        directionsDisplay.setDirections(response);
-      }
-    });
-
-    directionsDisplay.setMap(map);
 
   }
 
