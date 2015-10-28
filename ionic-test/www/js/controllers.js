@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope, $ionicPlatform, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval, $ionicLoading) {
+.controller('DashCtrl', function($scope, $ionicPlatform, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval, $ionicLoading, $timeout) {
 
     $scope.lastSyncArduino = "Never";
     $scope.lastSyncServer = "Never";
