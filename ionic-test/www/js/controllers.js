@@ -57,6 +57,7 @@ angular.module('starter.controllers', [])
     }, 10000);
 
     })
+
 .controller('DatasCtrl', function($scope, Datas) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -86,100 +87,102 @@ angular.module('starter.controllers', [])
   };
 })
 
-  .controller('MapCtrl', function($scope, $ionicLoading, $compile) {
-    function initialize() {
-      var site = new google.maps.LatLng(55.9879314,-4.3042387);
-      var hospital = new google.maps.LatLng(55.8934378,-4.2201905);
+.controller('MapCtrl', function($scope, $ionicLoading, $compile) {
+  function initialize() {
+    var site = new google.maps.LatLng(55.9879314,-4.3042387);
+    var hospital = new google.maps.LatLng(55.8934378,-4.2201905);
 
-      var mapOptions = {
-        streetViewControl:true,
-        center: site,
-        zoom: 18,
-        mapTypeId: google.maps.MapTypeId.TERRAIN
-      };
-      var map = new google.maps.Map(document.getElementById("map"),
-        mapOptions);
+    var mapOptions = {
+      streetViewControl:true,
+      center: site,
+      zoom: 18,
+      mapTypeId: google.maps.MapTypeId.TERRAIN
+    };
 
-      //Marker + infowindow + angularjs compiled ng-click
-      var contentString = "<div><a ng-click='clickTest()'>Click me!</a></div>";
-      var compiled = $compile(contentString)($scope);
+    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-      var infowindow = new google.maps.InfoWindow({
-        content: compiled[0]
-      });
+  //Marker + infowindow + angularjs compiled ng-click
+    var contentString = "<div><a ng-click='clickTest()'>Click me!</a></div>";
+    var compiled = $compile(contentString)($scope);
 
-      var marker = new google.maps.Marker({
-        position: site,
-        map: map,
-        title: 'Strathblane (Job Location)'
-      });
+    var infowindow = new google.maps.InfoWindow({
+      content: compiled[0]
+    });
 
-      var hospitalRoute = new google.maps.Marker({
-        position: hospital,
-        map: map,
-        title: 'Hospital (Stobhill)'
-      });
+    var marker = new google.maps.Marker({
+      position: site,
+      map: map,
+      title: 'Strathblane (Job Location)'
+    });
 
-      var infowindow = new google.maps.InfoWindow({
-        content:"Project Location"
-      });
+    var hospitalRoute = new google.maps.Marker({
+      position: hospital,
+      map: map,
+      title: 'Hospital (Stobhill)'
+    });
 
+    var infowindow = new google.maps.InfoWindow({
+      content:"Project Location"
+    });
+
+    infowindow.open(map,marker);
+
+    var hospitalwindow = new google.maps.InfoWindow({
+      content:"Nearest Hospital"
+    });
+
+    hospitalwindow.open(map,hospitalRoute);
+
+    google.maps.event.addListener(marker, 'click', function() {
       infowindow.open(map,marker);
+    });
 
-      var hospitalwindow = new google.maps.InfoWindow({
-        content:"Nearest Hospital"
-      });
+    $scope.map = map;
 
-      hospitalwindow.open(map,hospitalRoute);
+    var directionsService = new google.maps.DirectionsService();
+    var directionsDisplay = new google.maps.DirectionsRenderer();
 
-      google.maps.event.addListener(marker, 'click', function() {
-        infowindow.open(map,marker);
-      });
+    var request = {
+      origin : site,
+      destination : hospital,
+      travelMode : google.maps.TravelMode.DRIVING
+    };
+    directionsService.route(request, function(response, status) {
+      if (status == google.maps.DirectionsStatus.OK) {
+        directionsDisplay.setDirections(response);
+      }
+    });
 
-      $scope.map = map;
+    directionsDisplay.setMap(map);
 
-      var directionsService = new google.maps.DirectionsService();
-      var directionsDisplay = new google.maps.DirectionsRenderer();
+  }
 
-      var request = {
-        origin : site,
-        destination : hospital,
-        travelMode : google.maps.TravelMode.DRIVING
-      };
-      directionsService.route(request, function(response, status) {
-        if (status == google.maps.DirectionsStatus.OK) {
-          directionsDisplay.setDirections(response);
-        }
-      });
+  initialize();
 
-      directionsDisplay.setMap(map);
+  //google.maps.event.addDomListener(window, 'load', initialize);
 
+  $scope.centerOnMe = function() {
+    if(!$scope.map) {
+      return;
     }
 
-    google.maps.event.addDomListener(window, 'load', initialize);
+    $scope.loading = $ionicLoading.show({
+      content: 'Getting current location...',
+      showBackdrop: false
+    });
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+      $scope.loading.hide();
+    }, function(error) {
+      alert('Unable to get location: ' + error.message);
+    });
+  };
 
-    $scope.centerOnMe = function() {
-      if(!$scope.map) {
-        return;
-      }
+  $scope.clickTest = function() {
+    alert('Example of infowindow with ng-click')
+  };
 
-      $scope.loading = $ionicLoading.show({
-        content: 'Getting current location...',
-        showBackdrop: false
-      });
-      navigator.geolocation.getCurrentPosition(function(pos) {
-        $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
-        $scope.loading.hide();
-      }, function(error) {
-        alert('Unable to get location: ' + error.message);
-      });
-    };
-
-    $scope.clickTest = function() {
-      alert('Example of infowindow with ng-click')
-    };
-
-  });
+});
 
 
 
