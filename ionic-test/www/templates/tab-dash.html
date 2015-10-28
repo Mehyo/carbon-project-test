@@ -12,7 +12,12 @@
       <div class="item item-divider">Phone informations</div>
       <div class="item item-body">
         <div>
-          Bluetooth devices: {{ devices }}
+          Bluetooth status: {{ bluetooth_label }}
+        </div>
+      </div>
+      <div class="item item-body" ng-repeat="device in devices">
+        <div>
+              [{{device.address}}] - {{device.class}} - {{device.name}}
         </div>
       </div>
       <div class="item item-body">

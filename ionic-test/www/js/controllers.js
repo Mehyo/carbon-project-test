@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval) {
+.controller('DashCtrl', function($scope, $ionicPlatform, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval, $ionicLoading) {
 
     $scope.lastSyncArduino = "Never";
     $scope.lastSyncServer = "Never";
@@ -8,41 +8,58 @@ angular.module('starter.controllers', [])
       return (new Date).getTime();
     };
 
-    /*navigator.geolocation.getCurrentPosition(function (position) {
-      $scope.lat = position.coords.latitude;
-      $scope.lng = position.coords.longitude;
-    });*/
+    $scope.lat = 0;
+    $scope.lng = 0;
 
     var watchOptions = {
-      frequency : 1000,
-      timeout : 5*60*1000,
-      enableHighAccuracy: true
+      timeout : 5000,
+      maximumAge: 3000,
+      enableHighAccuracy: true // may cause errors if true
     };
 
-    var watch = $cordovaGeolocation.watchPosition(watchOptions);
-    watch.then(
-      null,
-      function(err) {
-        alert("GPS Localization failed: "+JSON.stringify(err));
-      },
-      function(position) {
-        $scope.lat = position.coords.latitude;
-        $scope.lng = position.coords.longitude;
-      });
-      $scope.devices = "null";
+    var pollCurrentLocation = function() {
+      $cordovaGeolocation.getCurrentPosition(watchOptions)
+        .then(function (position) {
+          var lat  = position.coords.latitude
+          var long = position.coords.longitude
+
+          $scope.lat = lat;
+          $scope.lng = long;
+        }, function(err) {
+          // error
+          console.log("gps error", err);
+        });
+      setTimeout(pollCurrentLocation, 1000);
+    };
+
+      $scope.devices = null;
       $scope.listBluetoothDevices = function() {
+        $scope.bluetooth_label = "Scanning...";
+        // Setup the loader
+        $ionicLoading.show({
+          content: 'Scanning...',
+          animation: 'fade-in',
+          showBackdrop: true,
+          maxWidth: 200,
+          showDelay: 0
+        });
         bluetoothSerial.discoverUnpaired(
-          function(undevices) {
-            angular.forEach(undevices, function(device){
-              $scope.devices.push(device);
+          function(unpaired_devices) {
+            $timeout(function(){
+              $scope.devices = unpaired_devices;
+              angular.forEach(unpaired_devices, function(device){
+                console.log(device);
+              });
+              $scope.bluetooth_label = "Done.";
+              $ionicLoading.hide();
             });
           },
           function(){
-            console.log("Err");
+            console.log("Bluetooth error.");
           });
       }
 
-    $interval(
+    /*$interval(
     $scope.scheduleSingleNotification = function () {
       $cordovaLocalNotification.schedule({
         id: 1,
@@ -54,7 +71,11 @@ angular.module('starter.controllers', [])
       }).then(function (result) {
         console.log('Notification error');
       })
-    }, 10000);
+    }, 10000);*/
+
+    $ionicPlatform.ready(function() {
+      pollCurrentLocation();
+    });
 
     })
 .controller('DatasCtrl', function($scope, Datas) {
