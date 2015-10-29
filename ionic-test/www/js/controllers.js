@@ -1,6 +1,7 @@
 angular.module('starter.controllers', [])
 
-  .controller('DashCtrl', function($scope, $ionicPlatform, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval, $ionicLoading, $timeout) {
+  .controller('DashCtrl', function($scope, $ionicPlatform, $cordovaLocalNotification, $cordovaGeolocation, $cordovaBluetoothSerial, $interval, $ionicLoading, $timeout, $cordovaDeviceMotion) {
+    $ionicPlatform.ready(function() {
 
     $scope.lastSyncArduino = "Never";
     $scope.lastSyncServer = "Never";
@@ -20,8 +21,8 @@ angular.module('starter.controllers', [])
     var pollCurrentLocation = function() {
       $cordovaGeolocation.getCurrentPosition(watchOptions)
         .then(function (position) {
-          var lat  = position.coords.latitude
-          var long = position.coords.longitude
+          var lat  = position.coords.latitude;
+          var long = position.coords.longitude;
 
           $scope.lat = lat;
           $scope.lng = long;
@@ -79,7 +80,46 @@ angular.module('starter.controllers', [])
      })
      }, 10000);*/
 
-    $ionicPlatform.ready(function() {
+    //Accel
+    var options = { frequency: 200 };
+    var isMoving = false;
+    var oldValues_isMoving=[];
+    var watch = navigator.accelerometer.watchAcceleration(function(result) {
+        var X = result.x;
+        var Y = result.y;
+        var Z = result.z;
+        var timeStamp = result.timestamp;
+        if (Math.abs(Math.sqrt(X * X + Y * Y + Z * Z) -9.5) >= 0.4){
+          //console.log("MOVING " + Math.abs(Math.sqrt(X * X + Y * Y + Z * Z) -9.5).toString());
+          oldValues_isMoving.push(true);
+        } else {
+          //console.log("STOPPED " + Math.abs(Math.sqrt(X * X + Y * Y + Z * Z) - 9.5).toString());
+          oldValues_isMoving.push(false);
+        }
+        console.log(oldValues_isMoving);
+        if(oldValues_isMoving.length >= 5){
+          var nbtrue = 0;
+          var nbfalse = 0;
+          for(var i = 0; i < oldValues_isMoving.length ;i++){
+            if(oldValues_isMoving[i]){
+              nbtrue++;
+            } else {
+              nbfalse++;
+            }
+          }
+          isMoving = (nbtrue > nbfalse);
+          oldValues_isMoving = [];
+        }
+        if(isMoving){
+          console.log("MOVING");
+        } else {
+          console.log("STOPPED");
+        }
+      },
+      function(error) {
+        console.log(error);
+      },
+      options);
       pollCurrentLocation();
     });
 
